@@ -1,4 +1,3 @@
-<!-- I Know I should be using postman for this but making gemini generate a page is easier -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,7 +44,7 @@
         <h2>Flask JWT Test Client</h2>
         
         <section>
-            <h3>1. Register User</h3>
+            <h3>1. Register User (Admin Only)</h3>
             <form id="register-form">
                 <label for="reg-username">Username:</label>
                 <input type="text" id="reg-username" required>
@@ -101,6 +100,23 @@
             // --- 1. Register ---
             document.getElementById("register-form").addEventListener("submit", async (e) => {
                 e.preventDefault();
+
+                // --- MODIFICATION START ---
+                // 1. Get the token from storage, just like for the protected route
+                const token = localStorage.getItem("access_token");
+
+                if (!token) {
+                    showOutput({ msg: "No token found. You must be logged in as an admin to register users." });
+                    return;
+                }
+
+                // 2. Define headers, including the token
+                const headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                };
+                // --- MODIFICATION END ---
+                
                 const username = document.getElementById("reg-username").value;
                 const password = document.getElementById("reg-password").value;
                 const role = document.getElementById("reg-role").value;
@@ -108,7 +124,7 @@
                 try {
                     const response = await fetch(`${API_URL}/register`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: headers, // <-- 3. Use the new headers object
                         body: JSON.stringify({ username, password, role })
                     });
                     const data = await response.json();
