@@ -1,1 +1,3 @@
-node modules
+venv
+__pycache__
+*.env
