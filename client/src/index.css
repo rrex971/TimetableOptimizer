@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+
+@theme {
+    --color-bg-50: #f4f7fa;
+    --color-bg-100: #e6edf3;
+    --color-bg-200: #d2deeb;
+    --color-bg-300: #b3c9dd;
+    --color-bg-400: #8eadcc;
+    --color-bg-500: #7394be;
+    --color-bg-600: #607db0;
+    --color-bg-700: #556da0;
+    --color-bg-800: #47577f; /*primary bgcolor*/
+    --color-bg-900: #3e4c6a;
+    --color-bg-950: #293042;
+}
+
+/* Custom scrollbar styling for horizontal scroll */
+.timetable-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.timetable-scroll::-webkit-scrollbar-track {
+    background: var(--color-bg-600);
+    border-radius: 4px;
+}
+
+.timetable-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-bg-400);
+    border-radius: 4px;
+}
+
+.timetable-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--color-bg-300);
+}
+
+/* Smooth scrolling behavior */
+.timetable-scroll {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-bg-400) var(--color-bg-600);
+}
