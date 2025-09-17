@@ -1,7 +1,7 @@
 import os
 from flask import Flask, jsonify, request
 from flask_jwt_extended import (
-    JWTManager, create_access_token, jwt_required, get_jwt_identity
+    JWTManager, create_access_token, get_jwt, jwt_required, get_jwt_identity
 )
 from flask_pymongo import PyMongo
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -38,7 +38,11 @@ def home():
 
 
 @app.route("/register", methods=["POST"])
+@jwt_required()
 def register():
+    claims = get_jwt()
+    if claims.get("role") != 'admin':
+        return jsonify({"msg": "Administration rights required"}), 403
     if not mongo:
         return jsonify({"msg": "Database connection error"}), 500
 
