@@ -1,60 +1,61 @@
 import React from "react";
 
 const Timetable = () => {
-    const days = ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"];
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const todayIndex = new Date().getDay();
+    const days = [...daysOfWeek.slice(todayIndex), ...daysOfWeek.slice(0, todayIndex)];
 
     const subjects = ["BCSE201L", "BCSE204L", "BCSE355L", "BCSE102L"];
     const getRandomSubject = () => subjects[Math.floor(Math.random() * subjects.length)];
 
     const scheduleData = {
         "Friday": [
-            { time: "9:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "10:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "11:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "12:00 PM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "2:00 PM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "3:00 PM", subject: getRandomSubject(), color: "bg-bg-700" }
+            { time: "9:00 AM", subject: getRandomSubject(),  subjectName: "SubjectName"},
+            { time: "10:00 AM", subject: getRandomSubject()},
+            { time: "11:00 AM", subject: getRandomSubject()},
+            { time: "12:00 PM", subject: getRandomSubject()},
+            { time: "2:00 PM", subject: getRandomSubject()},
+            { time: "3:00 PM", subject: getRandomSubject()}
         ],
         "Saturday": [
-            { time: "8:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "10:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "12:00 PM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "2:00 PM", subject: getRandomSubject(), color: "bg-bg-700" }
+            { time: "8:00 AM", subject: getRandomSubject()},
+            { time: "10:00 AM", subject: getRandomSubject()},
+            { time: "12:00 PM", subject: getRandomSubject()},
+            { time: "2:00 PM", subject: getRandomSubject()}
         ],
         "Sunday": [
-            { time: "9:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "11:00 AM", subject: getRandomSubject(), color: "bg-bg-700" }
+            { time: "9:00 AM", subject: getRandomSubject()},
+            { time: "11:00 AM", subject: getRandomSubject()}
         ],
         "Monday": [
-            { time: "8:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "9:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "10:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "11:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "1:00 PM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "3:00 PM", subject: getRandomSubject(), color: "bg-bg-700" }
+            { time: "8:00 AM", subject: getRandomSubject()},
+            { time: "9:00 AM", subject: getRandomSubject()},
+            { time: "10:00 AM", subject: getRandomSubject()},
+            { time: "11:00 AM", subject: getRandomSubject()},
+            { time: "1:00 PM", subject: getRandomSubject()},
+            { time: "3:00 PM", subject: getRandomSubject()}
         ],
         "Tuesday": [
-            { time: "9:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "10:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "11:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "1:00 PM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "3:00 PM", subject: getRandomSubject(), color: "bg-bg-700" }
+            { time: "9:00 AM", subject: getRandomSubject()},
+            { time: "10:00 AM", subject: getRandomSubject()},
+            { time: "11:00 AM", subject: getRandomSubject()},
+            { time: "1:00 PM", subject: getRandomSubject()},
+            { time: "3:00 PM", subject: getRandomSubject()}
         ],
         "Wednesday": [
-            { time: "8:00 AM", subject: getRandomSubject(), color: "bg-bg-400" },
-            { time: "9:50 AM", subject: getRandomSubject(), color: "bg-bg-400" },
-            { time: "11:00 AM", subject: getRandomSubject(), color: "bg-bg-400" },
-            { time: "12:00 PM", subject: getRandomSubject(), color: "bg-bg-400" },
-            { time: "2:00 PM", subject: getRandomSubject(), color: "bg-bg-400" }
+            { time: "8:00 AM", subject: getRandomSubject()},
+            { time: "9:50 AM", subject: getRandomSubject()},
+            { time: "11:00 AM", subject: getRandomSubject()},
+            { time: "12:00 PM", subject: getRandomSubject()},
+            { time: "2:00 PM", subject: getRandomSubject()}
         ],
         "Thursday": [
-            { time: "9:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "10:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            { time: "11:00 AM", subject: getRandomSubject(), color: "bg-bg-700" },
-            // Two continuous hours of BCSE204P
-            { time: "1:00 PM", subject: "BCSE204P", color: "bg-bg-700" },
-            { time: "2:00 PM", subject: "BCSE204P", color: "bg-bg-700" },
-            { time: "3:00 PM", subject: getRandomSubject(), color: "bg-bg-700" }
+            { time: "9:00 AM", subject: getRandomSubject()},
+            { time: "10:00 AM", subject: getRandomSubject()},
+            { time: "11:00 AM", subject: getRandomSubject()},
+            { time: "1:00 PM", subject: "BCSE204P"},
+            { time: "2:00 PM", subject: "BCSE204P"},
+            { time: "3:00 PM", subject: getRandomSubject()}
         ]
     };
 
@@ -104,7 +105,7 @@ const Timetable = () => {
                                     scheduleData[day].map((classItem, index) => (
                                         <div
                                             key={index}
-                                            className={`${classItem.color} text-white p-3 rounded-md shadow-sm`}
+                                            className={`${isToday(day) ? 'bg-bg-500' : 'bg-bg-700'} text-white p-3 rounded-md shadow-sm`}
                                         >
                                             {classItem.isSpecial ? (
                                                 <div className="text-center">

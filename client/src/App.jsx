@@ -4,7 +4,7 @@ import Timetable from "./components/Timetable";
 function App() {
 
   return (
-    <div className="main bg-bg-800 min-h-screen w-screen">
+    <div className="main font-main bg-bg-800 min-h-screen w-screen">
       <Navbar />
       <Timetable />
     </div>
