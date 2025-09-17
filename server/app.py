@@ -3,13 +3,13 @@ from flask import Flask, jsonify, request
 from flask_jwt_extended import (
     JWTManager, create_access_token, get_jwt, jwt_required, get_jwt_identity
 )
-from pymongo import MongoClient  # Using MongoClient directly
+from pymongo import MongoClient
+import certifi
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from flask_cors import CORS
 from bson import json_util
 import json
-import certifi
 
 load_dotenv()
 
@@ -66,7 +66,18 @@ def register():
         "role": role
     }
 
-    if role == 'faculty':
+    if role == 'student':
+        student_id = data.get("student_id")
+        if not student_id:
+            return jsonify({"msg": "Missing student_id for student registration"}), 400
+        user_document["student_id"] = student_id
+
+    elif role == 'faculty':
+        professor_id = data.get("professor_id")
+        if not professor_id:
+            return jsonify({"msg": "Missing professor_id for faculty registration"}), 400
+        user_document["professor_id"] = professor_id
+
         course_id = data.get("course_id")
         if not course_id:
             return jsonify({"msg": "Missing course_id for faculty registration"}), 400
@@ -79,15 +90,8 @@ def register():
 
         db.courses.update_one(
             {"course_id": course_id},
-            {"$set": {"professor_id": username}}
+            {"$set": {"professor_id": professor_id}}
         )
-
-    elif role == 'student':
-        student_id = data.get("student_id")
-        if not student_id:
-            return jsonify({"msg": "Missing student_id for student registration"}), 400
-        user_document["student_id"] = student_id
-
     elif role != 'admin':
         return jsonify({"msg": "Invalid role. Must be 'admin', 'faculty', or 'student'"}), 400
 
@@ -111,9 +115,14 @@ def login():
     user = db.users.find_one({"username": username})
 
     if user and check_password_hash(user["password_hash"], password):
+
         additional_claims = {"role": user["role"]}
+
         if user["role"] == 'student' and "student_id" in user:
             additional_claims["student_id"] = user["student_id"]
+
+        if user["role"] == 'faculty' and "professor_id" in user:
+            additional_claims["professor_id"] = user["professor_id"]
 
         access_token = create_access_token(
             identity=username,
@@ -153,9 +162,13 @@ def get_my_course():
     if claims.get("role") != 'faculty':
         return jsonify({"msg": "Only users with 'faculty' role can access this"}), 403
 
-    faculty_username = get_jwt_identity()
+    faculty_prof_id = claims.get("professor_id")
+
+    if not faculty_prof_id:
+        return jsonify({"msg": "Token is valid but missing 'professor_id' claim"}), 422
+
     assigned_course = db.courses.find_one(
-        {"professor_id": faculty_username})
+        {"professor_id": faculty_prof_id})
 
     if not assigned_course:
         return jsonify({"msg": "No course assigned to you"}), 404
