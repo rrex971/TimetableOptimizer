@@ -1,4 +1,5 @@
 import os
+
 from flask import Flask, jsonify, request
 from flask_jwt_extended import (
     JWTManager, create_access_token, get_jwt, jwt_required, get_jwt_identity
@@ -9,6 +10,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from flask_cors import CORS
 from bson import json_util
+from collections import defaultdict
+import utils.scheduler as sch
 import json
 
 load_dotenv()
@@ -175,6 +178,94 @@ def get_my_course():
 
     course_details = json.loads(json_util.dumps(assigned_course))
     return jsonify(course_details), 200
+
+
+@app.route("/admin/generate-timetable", methods=["POST"])
+@jwt_required()
+def generate_timetable_route():
+    claims = get_jwt()
+    if claims.get("role") != 'admin':
+        return jsonify({"msg": "Administration rights required"}), 403
+
+    if db == None:
+        return jsonify({"msg": "Database connection error"}), 500
+
+    print("Generating timetable: Fetching data...")
+    try:
+        courses = list(db.courses.find({}))
+        students = list(db.users.find({"role": "student"}))
+        faculty_list = list(db.users.find({"role": "faculty"}))
+
+    except Exception as e:
+        return jsonify({"msg": f"Error fetching data: {e}"}), 500
+
+    solution = sch.create_solver(courses)
+
+    if not solution:
+        return jsonify({"msg": "Failed to generate a timetable. The constraints may be impossible to solve (e.g., more courses than time slots)."}), 500
+
+    print("Timetable solution found. Saving to user profiles...")
+
+    try:
+
+        all_course_ids = [course['course_id'] for course in courses]
+        full_student_timetable = sch.format_solution_for_user(
+            solution, all_course_ids)
+
+        db.users.update_many(
+            {"role": "student"},
+            {"$set": {"timetable": full_student_timetable}}
+        )
+        print(f"Updated {len(students)} student timetables.")
+
+        professor_courses = defaultdict(list)
+        for course in courses:
+            if course.get('professor_id'):
+                professor_courses[course['professor_id']].append(
+                    course['course_id'])
+
+        faculty_updated_count = 0
+        for faculty in faculty_list:
+            prof_id = faculty.get('professor_id')
+            if prof_id and prof_id in professor_courses:
+                user_course_ids = professor_courses[prof_id]
+                formatted_timetable = sch.format_solution_for_user(
+                    solution, user_course_ids)
+
+                db.users.update_one(
+                    {"_id": faculty["_id"]},
+                    {"$set": {"timetable": formatted_timetable}}
+                )
+                faculty_updated_count += 1
+
+        print(f"Updated {faculty_updated_count} faculty timetables.")
+
+    except Exception as e:
+        return jsonify({"msg": f"Error saving timetables: {e}"}), 500
+
+    print("All user timetables updated.")
+    return jsonify({"msg": "Timetable generated and saved successfully!"}), 200
+
+
+@app.route("/api/my-timetable", methods=["GET"])
+@jwt_required()
+def get_my_timetable():
+    if db == None:
+        return jsonify({"msg": "Database connection error"}), 500
+
+    current_user_identity = get_jwt_identity()
+    user = db.users.find_one({"username": current_user_identity})
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    timetable = user.get("timetable")
+
+    if not timetable:
+        empty_schedule = {day: [] for day in sch.DAYS}
+        return jsonify(empty_schedule), 200
+
+    return jsonify(timetable), 200
 
 
 @jwt.unauthorized_loader
