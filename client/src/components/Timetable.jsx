@@ -10,7 +10,7 @@ const Timetable = () => {
 
     const scheduleData = {
         "Friday": [
-            { time: "9:00 AM", subjectCode: getRandomSubject(),  subjectName: "SubjectName"},
+            { time: "9:00 AM", subject: getRandomSubject(),  subjectName: "SubjectName"},
             { time: "10:00 AM", subject: getRandomSubject()},
             { time: "11:00 AM", subject: getRandomSubject()},
             { time: "12:00 PM", subject: getRandomSubject()},
