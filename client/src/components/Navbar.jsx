@@ -2,7 +2,7 @@ import React from "react";
 import { HiPower } from "react-icons/hi2";
 import { Link, useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({ role }) => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -16,7 +16,7 @@ const Navbar = () => {
                 <Link to="/" className="text-4xl font-bold text-white hover:text-bg-300 transition">
                     TTHelper
                 </Link>
-                <div className="flex space-x-8">
+                <div className={` ${role === 'admin' ? 'hidden' : 'flex space-x-8'}`}>
                     <Link to="/schedule" className="text-white hover:text-bg-300 transition">
                         Schedule
                     </Link>
