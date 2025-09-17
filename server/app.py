@@ -16,11 +16,15 @@ CORS(app)
 app.config["MONGO_URI"] = os.environ.get("MONGO_URI")
 
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
+if not app.config["MONGO_URI"]:
+    print("Error: MONGO_URI is not set. Check your .env file.")
+if not app.config["JWT_SECRET_KEY"]:
+    print("Error: JWT_SECRET_KEY is not set. Check your .env file.")
 
 
 try:
     mongo = PyMongo(app)
-
+    mongo.db.command('ping')
 except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
     mongo = None
