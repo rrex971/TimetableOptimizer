@@ -27,7 +27,6 @@ const FeedbackPopup = ({ open, onClose }) => {
   );
 };
 
-// Inline styles for popup and stars
 const overlayStyle = {
   position: 'fixed',
   top: 0,

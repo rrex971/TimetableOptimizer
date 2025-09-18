@@ -200,7 +200,7 @@ def generate_timetable_route():
         return jsonify({"msg": f"Error fetching data: {e}"}), 500
 
     force_regenerate = request.args.get('force', 'false').lower() == 'true'
-    solution = sch.get_solution_from_cache(courses, force_regenerate)
+    solution = sch.get_solution_from_cache(courses, True)
 
     if not solution:
         return jsonify({"msg": "Failed to generate a timetable. The constraints may be impossible to solve (e.g., more courses than time slots)."}), 500
