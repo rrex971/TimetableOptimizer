@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import FeedbackPopup from "../screens/FeedbackPopup";
 import { jwtDecode } from "jwt-decode";
 
 const Timetable = () => {
     const [scheduleData, setScheduleData] = useState(null);
+    const [feedbackOpen, setFeedbackOpen] = useState(false);
     const [userName, setUserName] = useState("User");
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -60,6 +62,7 @@ const Timetable = () => {
                 }
 
                 const data = await response.json();
+                console.log("Fetched timetable data:", data);
                 setScheduleData(data);
 
             } catch (err) {
@@ -109,8 +112,11 @@ const Timetable = () => {
                     </p>
                     
                 </div>
-                <button className="bg-teal-500 text-2xl font-bold hover:bg-teal-600 text-white h-fit px-4 py-2 rounded-2xl transition-colors">
-                        Timetable Feedback
+                <button
+                    className="bg-teal-500 text-2xl font-bold hover:bg-teal-600 text-white h-fit px-4 py-2 rounded-2xl transition-colors"
+                    onClick={() => setFeedbackOpen(true)}
+                >
+                    Timetable Feedback
                 </button>
             </div>
 
@@ -136,7 +142,7 @@ const Timetable = () => {
                                         >
                                             {console.log(classItem)}
                                             <div className="text-sm font-medium mb-1">{classItem.time}</div>
-                                            <div className="font-semibold">{classItem.subject}</div>
+                                            <div className="font-semibold">{classItem.subject}: {classItem.course_name}</div>
                                         </div>
                                     ))
                                 ) : (
@@ -149,7 +155,8 @@ const Timetable = () => {
                     ))}
                 </div>
             </div>
-        </div>
+        <FeedbackPopup open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+    </div>
     );
 };
 

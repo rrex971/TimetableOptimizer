@@ -7,6 +7,7 @@ import Student from "./screens/Student";
 import Faculty from "./screens/Faculty";
 import Admin from "./screens/Admin";
 import Contact from "./screens/Contact";
+import Courses from "./screens/Courses";
 
 function App() {
   return (
@@ -42,13 +43,7 @@ function App() {
           } />
           <Route path="/courses" element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-bg-800">
-                <Navbar />
-                <div className="px-12 py-8">
-                  <h1 className="text-4xl font-bold text-white mb-8">Courses</h1>
-                  <div className="text-white">Courses page content coming soon...</div>
-                </div>
-              </div>
+              <Courses />
             </ProtectedRoute>
           } />
           <Route path="/contact" element={
