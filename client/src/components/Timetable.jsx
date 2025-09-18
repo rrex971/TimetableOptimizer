@@ -1,80 +1,109 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const Timetable = () => {
+    const [scheduleData, setScheduleData] = useState(null);
+    const [userName, setUserName] = useState("User");
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const todayIndex = new Date().getDay();
     const days = [...daysOfWeek.slice(todayIndex), ...daysOfWeek.slice(0, todayIndex)];
 
-    const subjects = ["BCSE201L", "BCSE204L", "BCSE355L", "BCSE102L"];
-    const getRandomSubject = () => subjects[Math.floor(Math.random() * subjects.length)];
-
-    const scheduleData = {
-        "Friday": [
-            { time: "9:00 AM", subject: getRandomSubject()},
-            { time: "10:00 AM", subject: getRandomSubject()},
-            { time: "11:00 AM", subject: getRandomSubject()},
-            { time: "12:00 PM", subject: getRandomSubject()},
-            { time: "2:00 PM", subject: getRandomSubject()},
-            { time: "3:00 PM", subject: getRandomSubject()}
-        ],
-        "Saturday": [
-            { time: "8:00 AM", subject: getRandomSubject()},
-            { time: "10:00 AM", subject: getRandomSubject()},
-            { time: "12:00 PM", subject: getRandomSubject()},
-            { time: "2:00 PM", subject: getRandomSubject()}
-        ],
-        "Sunday": [
-            { time: "9:00 AM", subject: getRandomSubject()},
-            { time: "11:00 AM", subject: getRandomSubject()}
-        ],
-        "Monday": [
-            { time: "8:00 AM", subject: getRandomSubject()},
-            { time: "9:00 AM", subject: getRandomSubject()},
-            { time: "10:00 AM", subject: getRandomSubject()},
-            { time: "11:00 AM", subject: getRandomSubject()},
-            { time: "1:00 PM", subject: getRandomSubject()},
-            { time: "3:00 PM", subject: getRandomSubject()}
-        ],
-        "Tuesday": [
-            { time: "9:00 AM", subject: getRandomSubject()},
-            { time: "10:00 AM", subject: getRandomSubject()},
-            { time: "11:00 AM", subject: getRandomSubject()},
-            { time: "1:00 PM", subject: getRandomSubject()},
-            { time: "3:00 PM", subject: getRandomSubject()}
-        ],
-        "Wednesday": [
-            { time: "8:00 AM", subject: getRandomSubject()},
-            { time: "9:50 AM", subject: getRandomSubject()},
-            { time: "11:00 AM", subject: getRandomSubject()},
-            { time: "12:00 PM", subject: getRandomSubject()},
-            { time: "2:00 PM", subject: getRandomSubject()}
-        ],
-        "Thursday": [
-            { time: "9:00 AM", subject: getRandomSubject()},
-            { time: "10:00 AM", subject: getRandomSubject()},
-            { time: "11:00 AM", subject: getRandomSubject()},
-            { time: "1:00 PM", subject: "BCSE204P"},
-            { time: "2:00 PM", subject: "BCSE204P"},
-            { time: "3:00 PM", subject: getRandomSubject()}
-        ]
-    };
-
     const getTodayName = () => {
         const today = new Date();
-        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        return dayNames[today.getDay()];
+
+        return daysOfWeek[today.getDay()];
     };
 
     const isToday = (day) => {
         return day === getTodayName();
     };
 
+    useEffect(() => {
+        const fetchTimetable = async () => {
+            setIsLoading(true);
+            setError(null);
+            
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    throw new Error("No authorization token found. Please log in again.");
+                }
+
+                try {
+                    const decodedToken = jwtDecode(token);
+                    
+                    const name = decodedToken.sub; 
+
+                    if (name && typeof name === 'string') {
+                        setUserName(name.charAt(0).toUpperCase() + name.slice(1));
+                    } else {
+                        setUserName("User"); 
+                    }
+
+                } catch (decodeError) {
+                    console.error("Error decoding token:", decodeError);
+                }
+
+                const response = await fetch('http://localhost:5000/api/my-timetable', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.msg || "Failed to fetch timetable.");
+                }
+
+                const data = await response.json();
+                setScheduleData(data);
+
+            } catch (err) {
+                setError(err.message);
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTimetable();
+    }, []); 
+
+
+    if (isLoading) {
+        return (
+            <div className="bg-bg-800 px-12 min-h-screen text-white text-3xl text-center pt-20">
+                Loading your schedule...
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-bg-800 px-12 min-h-screen text-red-400 text-3xl text-center pt-20">
+                Error: {error}
+            </div>
+        );
+    }
+    
+    if (!scheduleData) {
+        return (
+             <div className="bg-bg-800 px-12 min-h-screen text-white text-3xl text-center pt-20">
+                No schedule data found.
+            </div>
+        )
+    }
+
     return (
         <div className="bg-bg-800 px-12 min-h-screen">
 
             <div className="flex justify-between">
                 <div className="mb-6">
-                    <h1 className="text-6xl font-bold text-white mb-2">Hello, Student</h1>
+                    <h1 className="text-6xl font-bold text-white mb-2">Hello, {userName}</h1>
                     <p className="text-bg-300 text-4xl">
                         Today is a <span className="font-semibold text-white">{getTodayName()}</span>
                     </p>
@@ -92,14 +121,12 @@ const Timetable = () => {
                             key={day}
                             className='flex-shrink-0 w-128 h-lvh rounded-lg p-4'
                         >
-                            {/* Day Header */}
                             <div className="text-left mb-4">
                                 <h3 className="text-lg font-semibold text-white">
                                     {day}
                                 </h3>
                             </div>
 
-                            {/* Classes for the day */}
                             <div className="space-y-3">
                                 {scheduleData[day] && scheduleData[day].length > 0 ? (
                                     scheduleData[day].map((classItem, index) => (
@@ -107,16 +134,8 @@ const Timetable = () => {
                                             key={index}
                                             className={`${isToday(day) ? 'bg-bg-500' : 'bg-bg-700'} text-white p-3 rounded-md shadow-sm`}
                                         >
-                                            {classItem.isSpecial ? (
-                                                <div className="text-center">
-                                                    <div className="text-xl font-bold">{classItem.subject}</div>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <div className="text-sm font-medium mb-1">{classItem.time}</div>
-                                                    <div className="font-semibold">{classItem.subject}</div>
-                                                </>
-                                            )}
+                                            <div className="text-sm font-medium mb-1">{classItem.time}</div>
+                                            <div className="font-semibold">{classItem.subject}</div>
                                         </div>
                                     ))
                                 ) : (
