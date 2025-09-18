@@ -62,6 +62,7 @@ const Timetable = () => {
                 }
 
                 const data = await response.json();
+                console.log("Fetched timetable data:", data);
                 setScheduleData(data);
 
             } catch (err) {
@@ -140,7 +141,7 @@ const Timetable = () => {
                                             className={`${isToday(day) ? 'bg-bg-500' : 'bg-bg-700'} text-white p-3 rounded-md shadow-sm`}
                                         >
                                             <div className="text-sm font-medium mb-1">{classItem.time}</div>
-                                            <div className="font-semibold">{classItem.subject}</div>
+                                            <div className="font-semibold">{classItem.subject}: {classItem.course_name}</div>
                                         </div>
                                     ))
                                 ) : (

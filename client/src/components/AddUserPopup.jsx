@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const AddUserPopup = ({ isOpen, onClose, onSubmit }) => {
     const [formData, setFormData] = useState({
@@ -6,6 +6,8 @@ const AddUserPopup = ({ isOpen, onClose, onSubmit }) => {
         password: "",
         role: "student"
     });
+
+    const [courses, setCourses] = useState([]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -39,6 +41,21 @@ const AddUserPopup = ({ isOpen, onClose, onSubmit }) => {
             onClose();
         }
     };
+
+    useEffect(() => {
+        if (formData.role === "faculty" && isOpen) {
+            const token = localStorage.getItem("accessToken");
+            fetch("http://localhost:5000/courses", {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+                .then(res => res.json())
+                .then(data => setCourses(Array.isArray(data) ? data : []))
+                .catch(() => setCourses([]));
+        }
+    }, [formData.role, isOpen]);
 
     if (!isOpen) return null;
 
@@ -85,6 +102,54 @@ const AddUserPopup = ({ isOpen, onClose, onSubmit }) => {
                             <option value="admin">Admin</option>
                         </select>
                     </div>
+                    {formData.role === "student" && (
+                        <div className="mb-4">
+                            <label className="block text-bg-300 mb-2" htmlFor="student_id">Student ID</label>
+                            <input
+                                type="text"
+                                id="student_id"
+                                name="student_id"
+                                value={formData.student_id || ""}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border-1 border-bg-800 rounded-lg text-bg-300 bg-bg-800"
+                                required
+                            />
+                        </div>
+                    )}
+                    {formData.role === "faculty" && (
+                        <>
+                            <div className="mb-4">
+                                <label className="block text-bg-300 mb-2" htmlFor="professor_id">Professor ID</label>
+                                <input
+                                    type="text"
+                                    id="professor_id"
+                                    name="professor_id"
+                                    value={formData.professor_id || ""}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border-1 border-bg-800 rounded-lg text-bg-300 bg-bg-800"
+                                    required
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-bg-300 mb-2" htmlFor="course_id">Course</label>
+                                <select
+                                    id="course_id"
+                                    name="course_id"
+                                    value={formData.course_id || ""}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border-1 border-bg-800 rounded-lg text-bg-300 bg-bg-800"
+                                    required
+                                >
+                                    <option value="">Select a course</option>
+                                    {courses.map(course => (
+                                        <option key={course.course_id || course._id} value={course.course_id || course._id}>
+                                            {course.course_id || course.course_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </>
+                    )}
                     <div className="flex justify-end space-x-4">
                         <button
                             type="button"

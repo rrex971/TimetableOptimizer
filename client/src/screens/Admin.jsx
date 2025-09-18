@@ -1,18 +1,46 @@
 import { useState } from "react";
 import Navbar from "../components/Navbar";
 import { FaUsers, FaBook, FaCog } from "react-icons/fa";
-import { useState } from "react";
 import AddUserPopup from "../components/AddUserPopup";
 
 const Admin = () => {
     const [showAddUser, setShowAddUser] = useState(false);
 
     const handleAddUser = (userData) => {
-        // Here you would typically make an API call to add the user
-        console.log('Adding user:', userData);
-        // For now, just close the popup
+        const token = localStorage.getItem('accessToken');
+        let payload = {
+            username: userData.username,
+            password: userData.password,
+            role: userData.role
+        };
+
+        // Add extra fields based on role
+        if (userData.role === "student") {
+            payload.student_id = userData.student_id;
+        } else if (userData.role === "faculty") {
+            payload.professor_id = userData.professor_id;
+            payload.course_id = userData.course_id;
+        }
+
+        fetch('http://localhost:5000/register', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json().then(data => ({ status: res.status, data })))
+        .then(({ status, data }) => {
+            if (data.msg) {
+                setMessage(data.msg);
+            }
+        })
+        .catch(err => {
+            setMessage("Error adding user.");
+            console.error(err);
+        });
         setShowAddUser(false);
-        // TODO: Add API call to create user
     };
 
     const handleClosePopup = () => {
