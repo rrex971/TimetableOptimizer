@@ -134,6 +134,7 @@ const Timetable = () => {
                                             key={index}
                                             className={`${isToday(day) ? 'bg-bg-500' : 'bg-bg-700'} text-white p-3 rounded-md shadow-sm`}
                                         >
+                                            {console.log(classItem)}
                                             <div className="text-sm font-medium mb-1">{classItem.time}</div>
                                             <div className="font-semibold">{classItem.subject}</div>
                                         </div>

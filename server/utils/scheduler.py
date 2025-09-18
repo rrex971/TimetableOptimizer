@@ -91,7 +91,13 @@ def get_solution_from_cache(courses, force_regenerate=False):
     return solution
 
 
-def format_solution_for_user(solution, user_course_ids):
+def format_solution_for_user(solution, user_course_ids, all_courses):
+
+    course_map = {
+        course['course_id']: course.get('course_name', '')
+        for course in all_courses
+    }
+
     user_timetable = {day: [] for day in DAYS}
 
     for course_id in user_course_ids:
@@ -104,9 +110,15 @@ def format_solution_for_user(solution, user_course_ids):
                 day_name = DAYS[day_idx]
                 time_str = TIME_SLOT_MAP.get(time_idx, "Unknown Time")
 
+                course_name = course_map.get(course_id, "Unknown Course")
+                if course_name:
+                    subject_display = f"{course_id} - {course_name}"
+                else:
+                    subject_display = course_id
+
                 user_timetable[day_name].append({
                     "time": time_str,
-                    "subject": course_id
+                    "subject": subject_display
                 })
 
     for day_name in user_timetable:

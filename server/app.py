@@ -210,8 +210,10 @@ def generate_timetable_route():
     try:
 
         all_course_ids = [course['course_id'] for course in courses]
+
         full_student_timetable = sch.format_solution_for_user(
-            solution, all_course_ids)
+            solution, all_course_ids, courses
+        )
 
         db.users.update_many(
             {"role": "student"},
@@ -231,7 +233,8 @@ def generate_timetable_route():
             if prof_id and prof_id in professor_courses:
                 user_course_ids = professor_courses[prof_id]
                 formatted_timetable = sch.format_solution_for_user(
-                    solution, user_course_ids)
+                    solution, user_course_ids, courses
+                )
 
                 db.users.update_one(
                     {"_id": faculty["_id"]},
