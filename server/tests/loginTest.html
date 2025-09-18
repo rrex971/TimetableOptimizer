@@ -22,19 +22,18 @@
         h2, h3 { border-bottom: 2px solid #eee; padding-bottom: 5px; }
         form { display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 20px; }
         label { text-align: right; padding-top: 5px; }
-        input, select, button { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+        input, select, button { padding: 8px; border-radius: 4px; border: 1px solid #ccc; width: 100%; box-sizing: border-box;}
         button { grid-column: 2 / 3; background: #007bff; color: white; cursor: pointer; border: none; }
         button:hover { background: #0056b3; }
-        #protected-button { background: #28a745; }
-        #protected-button:hover { background: #218838; }
+        .action-button { grid-column: 1 / -1; } /* Button spans both columns */
         #response-output {
             background: #222;
             color: #00ff00;
             padding: 15px;
             border-radius: 4px;
             font-family: "Courier New", Courier, monospace;
-            white-space: pre-wrap; /* Allows text to wrap */
-            word-wrap: break-word; /* Breaks long strings (like tokens) */
+            white-space: pre-wrap;
+            word-wrap: break-word;
             margin-top: 20px;
         }
     </style>
@@ -54,11 +53,19 @@
                 
                 <label for="reg-role">Role:</label>
                 <select id="reg-role">
+                    <option value="admin" selected>Admin</option>
                     <option value="student">Student</option>
                     <option value="faculty">Faculty</option>
-                    <option value="admin">Admin</option>
                 </select>
                 
+                <label for="reg-student-id" id="label-student-id" style="display: none;">Student ID:</label>
+                <input type="text" id="reg-student-id" style="display: none;">
+                
+                <label for="reg-prof-id" id="label-prof-id" style="display: none;">Professor ID:</label>
+                <input type="text" id="reg-prof-id" style="display: none;">
+                
+                <label for="reg-course-id" id="label-course-id" style="display: none;">Course ID:</label>
+                <input type="text" id="reg-course-id" style="display: none;">
                 <button type="submit">Register</button>
             </form>
         </section>
@@ -77,8 +84,23 @@
         </section>
 
         <section>
-            <h3>3. Access Protected Data</h3>
-            <button id="protected-button">Call /protected</button>
+            <h3>3. View All Courses (Logged-in Users)</h3>
+            <button id="get-courses-button" class="action-button" style="background-color: #17a2b8;">Get All Courses</button>
+        </section>
+
+        <section>
+            <h3>4. Select a Course (Faculty Only)</h3>
+            <form id="select-course-form">
+                <label for="course-id">Course ID:</label>
+                <input type="text" id="course-id" placeholder="e.g., BCSE202L" required>
+                
+                <button type="submit" style="background-color: #ffc107; color: #333;">Select Course (Test)</button>
+            </form>
+        </section>
+
+        <section>
+            <h3>5. Access Protected Data</h3>
+            <button id="protected-button" class="action-button" style="background-color: #28a745;">Call /protected</button>
         </section>
 
         <section>
@@ -89,43 +111,86 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const API_URL = "http://localhost:5000";
+            const API_URL = "http://127.0.0.1:5000";
             const output = document.getElementById("response-output");
 
-            // --- Helper function to show output ---
             function showOutput(data) {
                 output.textContent = JSON.stringify(data, null, 2);
             }
 
+            // --- DYNAMIC FIELDS LOGIC ---
+            const roleSelect = document.getElementById("reg-role");
+            const studentIdLabel = document.getElementById("label-student-id");
+            const studentIdInput = document.getElementById("reg-student-id");
+            const profIdLabel = document.getElementById("label-prof-id");
+            const profIdInput = document.getElementById("reg-prof-id");
+            const courseIdLabel = document.getElementById("label-course-id");
+            const courseIdInput = document.getElementById("reg-course-id");
+
+            roleSelect.addEventListener("change", (e) => {
+                const role = e.target.value;
+                
+                // Hide all first
+                studentIdLabel.style.display = "none";
+                studentIdInput.style.display = "none";
+                profIdLabel.style.display = "none";
+                profIdInput.style.display = "none";
+                courseIdLabel.style.display = "none";
+                courseIdInput.style.display = "none";
+
+                if (role === 'student') {
+                    studentIdLabel.style.display = "block";
+                    studentIdInput.style.display = "block";
+                } else if (role === 'faculty') {
+                    profIdLabel.style.display = "block";
+                    profIdInput.style.display = "block";
+                    courseIdLabel.style.display = "block";
+                    courseIdInput.style.display = "block";
+                }
+            });
+
             // --- 1. Register ---
             document.getElementById("register-form").addEventListener("submit", async (e) => {
                 e.preventDefault();
-
-                // --- MODIFICATION START ---
-                // 1. Get the token from storage, just like for the protected route
                 const token = localStorage.getItem("access_token");
 
                 if (!token) {
                     showOutput({ msg: "No token found. You must be logged in as an admin to register users." });
                     return;
                 }
-
-                // 2. Define headers, including the token
-                const headers = {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                };
-                // --- MODIFICATION END ---
                 
+                // Get standard fields
                 const username = document.getElementById("reg-username").value;
                 const password = document.getElementById("reg-password").value;
                 const role = document.getElementById("reg-role").value;
+                
+                // Create base payload
+                const payload = { username, password, role };
+
+                // Add conditional fields
+                if (role === 'student') {
+                    payload.student_id = document.getElementById("reg-student-id").value;
+                    if (!payload.student_id) {
+                        showOutput({ msg: "Student ID is required for student role." });
+                        return;
+                    }
+                } else if (role === 'faculty') {
+                    payload.professor_id = document.getElementById("reg-prof-id").value;
+                    payload.course_id = document.getElementById("reg-course-id").value;
+                    if (!payload.professor_id || !payload.course_id) {
+                        showOutput({ msg: "Professor ID and Course ID are required for faculty role." });
+                        return;
+                    }
+                }
 
                 try {
                     const response = await fetch(`${API_URL}/register`, {
                         method: "POST",
-                        headers: headers, // <-- 3. Use the new headers object
-                        body: JSON.stringify({ username, password, role })
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify(payload) // Send the dynamic payload
                     });
                     const data = await response.json();
                     showOutput(data);
@@ -150,7 +215,6 @@
                     const data = await response.json();
                     
                     if (response.ok) {
-                        // Store the token in localStorage
                         localStorage.setItem("access_token", data.access_token);
                         showOutput({ success: "Logged in. Token stored.", data });
                     } else {
@@ -162,7 +226,61 @@
                 }
             });
 
-            // --- 3. Access Protected Route ---
+            // --- 3. Get All Courses ---
+            document.getElementById("get-courses-button").addEventListener("click", async () => {
+                const token = localStorage.getItem("access_token");
+
+                if (!token) {
+                    showOutput({ msg: "No access token found. Please log in first." });
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_URL}/courses`, {
+                        method: "GET",
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+                    const data = await response.json();
+                    showOutput(data);
+                } catch (error) {
+                    showOutput({ error: error.message });
+                }
+            });
+
+            // --- 4. Select a Course ---
+            // Note: Your backend doesn't have a POST /courses/select endpoint yet.
+            // This form is here, but will return a 404.
+            document.getElementById("select-course-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const token = localStorage.getItem("access_token");
+                const courseId = document.getElementById("course-id").value;
+
+                if (!token) {
+                    showOutput({ msg: "No access token found. You must be logged in as a faculty member." });
+                    return;
+                }
+                if (!courseId) {
+                    showOutput({ msg: "Please enter a Course ID." });
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_URL}/courses/select`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ course_id: courseId })
+                    });
+                    const data = await response.json();
+                    showOutput(data);
+                } catch (error) {
+                    showOutput({ error: error.message });
+                }
+            });
+            
+            // --- 5. Access Protected Route ---
             document.getElementById("protected-button").addEventListener("click", async () => {
                 const token = localStorage.getItem("access_token");
 
@@ -174,14 +292,11 @@
                 try {
                     const response = await fetch(`${API_URL}/protected`, {
                         method: "GET",
-                        headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
+                        headers: { "Authorization": `Bearer ${token}` }
                     });
                     
                     const data = await response.json();
                     showOutput(data);
-
                 } catch (error) {
                     showOutput({ error: error.message });
                 }

@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import { FaUsers, FaBook, FaCog } from "react-icons/fa";
 import { useState } from "react";
@@ -19,6 +19,40 @@ const Admin = () => {
         setShowAddUser(false);
     };
 
+    const [isLoading, setIsLoading] = useState(false);
+    const [_message, setMessage] = useState("");
+
+    const handleGenerate = async () => {
+        
+        setIsLoading(true);
+        setMessage("Generating timetable...");
+
+        const token = localStorage.getItem('accessToken');
+
+        try {
+            const response = await fetch('http://localhost:5000/admin/generate-timetable', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setMessage(data.msg || "Timetable generated successfully!");
+            } else {
+                setMessage(data.msg || "Error generating timetable.");
+            }
+        } catch (error) {
+            console.error("Generate timetable error:", error);
+            setMessage("Network error. Could not generate timetable.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-bg-800">
             <Navbar role="admin"/>
@@ -34,9 +68,9 @@ const Admin = () => {
                             <FaUsers size={96} />
                             Manage Users
                         </button>
-                        <button className="bg-bg-600 hover:bg-bg-500 text-white text-4xl py-9 px-6 rounded-lg transition-colors flex flex-col items-center gap-3">
+                        <button onClick={handleGenerate} disabled={isLoading} className="bg-bg-600 hover:bg-bg-500 text-white text-4xl py-9 px-6 rounded-lg transition-colors flex flex-col items-center gap-3">
                             <FaBook size={96} />
-                            Generate Next Timetable
+                            {isLoading ? "Generating..." : "Generate Timetable"}
                         </button>
                     </div>
                 </div>
