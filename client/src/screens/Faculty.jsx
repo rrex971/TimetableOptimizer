@@ -8,6 +8,7 @@ const Faculty = () => {
             <Navbar />
             <div className="px-12 py-8">
                 <h1 className="text-4xl font-bold text-white mb-8">Faculty Dashboard</h1>
+                <Timetable />
             </div>
         </div>
     );
