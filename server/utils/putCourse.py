@@ -5,30 +5,14 @@ from pymongo.errors import ConnectionFailure
 import certifi
 
 courses = [
-    {"course_id": "BCSE103E", "course_name": "Computer Programming: Java"},
     {"course_id": "BCSE202L", "course_name": "Data Structures and Algorithms"},
-    {"course_id": "BCSE202P", "course_name": "Data Structures and Algorithms Lab"},
     {"course_id": "BCSE205L", "course_name": "Computer Architecture and Organization"},
     {"course_id": "BCSE308L", "course_name": "Computer Networks"},
-    {"course_id": "BCSE308P", "course_name": "Computer Networks Lab"},
     {"course_id": "BECE204L", "course_name": "Microprocessors and Microcontrollers"},
-    {"course_id": "BECE204P",
-        "course_name": "Microprocessors and Microcontrollers Lab"},
-    {"course_id": "BFRE101L", "course_name": "French I"},
     {"course_id": "BMAT201L", "course_name": "Complex Variables and Linear Algebra"},
-    {"course_id": "BSTS202P", "course_name": "Qualitative Skills Practice II"},
-
-    {"course_id": "BCSE203E", "course_name": "Web Programming"},
-    {"course_id": "BCSE203E", "course_name": "Web Programming"},
     {"course_id": "BCSE302L", "course_name": "Database Systems"},
     {"course_id": "BCSE302P", "course_name": "Database Systems Lab"},
     {"course_id": "BCSE303L", "course_name": "Operating Systems"},
-    {"course_id": "BCSE303P", "course_name": "Operating Systems Lab"},
-    {"course_id": "BCSE304L", "course_name": "Theory of Computation"},
-    {"course_id": "BCSE313L", "course_name": "Fundamentals of Fog and Edge Computing"},
-    {"course_id": "BMAT202L", "course_name": "Probability and Statistics"},
-    {"course_id": "BMAT202P", "course_name": "Probability and Statistics Lab"},
-    {"course_id": "BSTS102P", "course_name": "Quantitative Skills Practice II"},
 ]
 
 
