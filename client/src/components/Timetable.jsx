@@ -142,7 +142,7 @@ const Timetable = () => {
                                         >
                                             {console.log(classItem)}
                                             <div className="text-sm font-medium mb-1">{classItem.time}</div>
-                                            <div className="font-semibold">{classItem.subject}: {classItem.course_name}</div>
+                                            <div className="font-semibold">{classItem.subject}</div>
                                         </div>
                                     ))
                                 ) : (
