@@ -38,11 +38,13 @@ const overlayStyle = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  zIndex: 1000
+  zIndex: 1000,
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)'
 };
 
 const popupStyle = {
-  background: '#fff',
+  background: '#47577f',
   borderRadius: '16px',
   padding: '32px 24px',
   minWidth: '320px',
@@ -57,6 +59,7 @@ const headerStyle = {
   fontSize: '1.3rem',
   fontWeight: 600,
   marginBottom: '8px',
+  color: '#14b8a6',
 };
 
 const starsStyle = {
@@ -86,7 +89,7 @@ function Star({ filled, onClick, animate }) {
         height: 28,
         cursor: 'pointer',
         position: 'relative',
-        transform: animate ? 'scale(1.1)' : 'scale(1)',
+        transform: `${animate ? 'scale(1.1)' : 'scale(1)'}${filled ? ' rotate(45deg)' : ''}`,
         transition: 'transform 0.15s',
       }}
       onClick={onClick}
